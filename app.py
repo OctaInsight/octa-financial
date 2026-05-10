@@ -45,7 +45,7 @@ if not projects:
 proj_opts = {}
 for p in projects:
     acr = p.get("acronym","").strip() or p["proposal_id"]
-    st  = p.get("status","")
+    _status = p.get("status","")
     proj_opts[f"{acr} — {p.get('proposal_title','')[:45]}"] = p["proposal_id"]
 
 cur_pid   = st.session_state.get("selected_project_id","")
