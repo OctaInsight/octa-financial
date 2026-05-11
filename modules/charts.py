@@ -79,23 +79,34 @@ def chart_budget_gauge(planned, actual, title="Budget Consumed"):
 # ── 2. Planned vs actual by category (grouped bar) ───────────────────────────
 def chart_by_category(by_cat: dict, title="Budget by Cost Category"):
     cats    = [k for k in CAT_LABELS if k in by_cat]
-    labels  = [CAT_LABELS.get(c,c) for c in cats]
-    planned = [by_cat[c].get("planned",0) for c in cats]
-    actual  = [by_cat[c].get("actual",0)  for c in cats]
-    colors  = [CAT_COLORS.get(c, D["muted"]) for c in cats]
+    labels  = [CAT_LABELS.get(c, c) for c in cats]
+    planned = [by_cat[c].get("planned", 0) for c in cats]
+    actual  = [by_cat[c].get("actual",  0) for c in cats]
+    solid   = [CAT_COLORS.get(c, D["muted"]) for c in cats]
+
+    # Faded planned bars — all as explicit rgba() strings
+    FADED = {
+        "personnel":            "rgba(0,188,212,0.33)",
+        "travel":               "rgba(111,207,151,0.33)",
+        "equipment":            "rgba(246,204,82,0.33)",
+        "other_goods_services": "rgba(255,107,53,0.33)",
+        "subcontracting":       "rgba(155,89,182,0.33)",
+        "third_parties":        "rgba(52,152,219,0.33)",
+        "overhead":             "rgba(136,153,176,0.33)",
+    }
+    faded = [FADED.get(c, "rgba(136,153,176,0.33)") for c in cats]
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(name="Planned", x=labels, y=planned,
-                         marker_color=[c.replace("#","rgba(").rstrip(")") for c in colors],
-                         marker=dict(
-                             color=["rgba(0,188,212,0.35)","rgba(111,207,151,0.35)",
-                                    "rgba(246,204,82,0.35)","rgba(255,107,53,0.35)",
-                                    "rgba(155,89,182,0.35)","rgba(52,152,219,0.35)",
-                                    "rgba(136,153,176,0.35)"][:len(cats)]),
-                         hovertemplate="%{x}<br>Planned: €%{y:,.0f}<extra></extra>"))
-    fig.add_trace(go.Bar(name="Actual", x=labels, y=actual,
-                         marker_color=colors,
-                         hovertemplate="%{x}<br>Actual: €%{y:,.0f}<extra></extra>"))
+    fig.add_trace(go.Bar(
+        name="Planned", x=labels, y=planned,
+        marker_color=faded,
+        hovertemplate="%{x}<br>Planned: €%{y:,.0f}<extra></extra>"
+    ))
+    fig.add_trace(go.Bar(
+        name="Actual", x=labels, y=actual,
+        marker_color=solid,
+        hovertemplate="%{x}<br>Actual: €%{y:,.0f}<extra></extra>"
+    ))
     fig.update_layout(barmode="group", xaxis_tickangle=-20,
                       yaxis_title="Amount (€)")
     return _layout(fig, title, 400)
